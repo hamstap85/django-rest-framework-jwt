@@ -9,8 +9,9 @@ import jwt
 def add_token_id_values(apps, schema_editor):
     """Fill in token_id values for existing token records that have a token id
     """
+    alias = schema_editor.connection.alias
     BlacklistedToken = apps.get_model('blacklist', 'BlacklistedToken')
-    for row in BlacklistedToken.objects.filter(token_id=None):
+    for row in BlacklistedToken.objects.using(alias).filter(token_id=None):
         payload = jwt.decode(row.token, None, options={'verify_signature': False})
         token_id = payload.get('orig_jti') or payload.get('jti')
         if token_id:
